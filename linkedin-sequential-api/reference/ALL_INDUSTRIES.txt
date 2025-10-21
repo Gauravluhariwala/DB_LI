@@ -1,0 +1,272 @@
+================================================================================
+ALL INDUSTRY VALUES - COMPLETE LIST
+================================================================================
+
+Fetching all industry values...
+Total unique industry values: 148
+
+================================================================================
+COMPLETE INDUSTRY LIST
+================================================================================
+
+#     Industry Name                                                                Companies
+-----------------------------------------------------------------------------------------------
+1     (empty/null)                                                                10,868,136
+2     Real Estate                                                                  2,578,041
+3     Medical Practice                                                             2,238,734
+4     Construction                                                                 2,221,703
+5     Retail                                                                       1,870,171
+6     Information Technology & Services                                            1,668,978
+7     Computer Software                                                            1,527,551
+8     Management Consulting                                                        1,474,961
+9     Marketing & Advertising                                                      1,292,113
+10    Individual & Family Services                                                 1,222,575
+11    Restaurants                                                                  1,169,841
+12    Hospital & Health Care                                                         954,263
+13    Financial Services                                                             795,324
+14    Health, Wellness & Fitness                                                     751,219
+15    Civic & Social Organization                                                    730,519
+16    Hospitality                                                                    631,940
+17    Non-profit Organization Management                                             592,553
+18    Transportation/Trucking/Railroad                                               501,027
+19    Food & Beverages                                                               493,999
+20    Consumer Goods                                                                 489,361
+21    Consumer Services                                                              486,702
+22    Electrical & Electronic Manufacturing                                          482,616
+23    Internet                                                                       478,731
+24    Facilities Services                                                            474,685
+25    Automotive                                                                     469,582
+26    Sports                                                                         455,551
+27    Higher Education                                                               446,465
+28    Accounting                                                                     415,423
+29    Education Management                                                           411,164
+30    Design                                                                         407,444
+31    Architecture & Planning                                                        406,022
+32    Wholesale                                                                      395,093
+33    Professional Training & Coaching                                               385,816
+34    Farming                                                                        373,551
+35    Machinery                                                                      371,415
+36    Apparel & Fashion                                                              368,921
+37    Mechanical Or Industrial Engineering                                           363,014
+38    Food Production                                                                362,489
+39    Insurance                                                                      354,834
+40    Law Practice                                                                   317,223
+41    Leisure, Travel & Tourism                                                      311,899
+42    Entertainment                                                                  309,619
+43    Mining & Metals                                                                300,188
+44    Legal Services                                                                 296,071
+45    Performing Arts                                                                283,357
+46    Business Supplies & Equipment                                                  283,108
+47    Media Production                                                               277,064
+48    Events Services                                                                275,491
+49    E-learning                                                                     263,146
+50    Government Administration                                                      260,985
+51    Human Resources                                                                254,115
+52    Staffing & Recruiting                                                          254,029
+53    Publishing                                                                     246,018
+54    Religious Institutions                                                         236,221
+55    Telecommunications                                                             230,860
+56    Research                                                                       225,746
+57    Environmental Services                                                         211,098
+58    Photography                                                                    203,487
+59    Investment Management                                                          201,052
+60    Building Materials                                                             199,398
+61    Furniture                                                                      195,873
+62    Oil & Energy                                                                   192,035
+63    Recreational Facilities & Services                                             189,739
+64    Primary/Secondary Education                                                    183,358
+65    Music                                                                          182,119
+66    Utilities                                                                      178,859
+67    Medical Device                                                                 175,771
+68    Textiles                                                                       172,300
+69    Civil Engineering                                                              168,283
+70    Package/Freight Delivery                                                       166,465
+71    Cosmetics                                                                      157,685
+72    Graphic Design                                                                 157,328
+73    Supermarkets                                                                   153,934
+74    Renewables & Environment                                                       144,690
+75    Chemicals                                                                      142,396
+76    Veterinary                                                                     138,008
+77    Motion Pictures & Film                                                         137,808
+78    Public Relations & Communications                                              136,857
+79    Online Media                                                                   134,065
+80    Security & Investigations                                                      133,204
+81    Mental Health Care                                                             126,649
+82    Printing                                                                       126,554
+83    Paper & Forest Products                                                        125,855
+84    International Trade & Development                                              123,297
+85    Plastics                                                                       122,985
+86    Banking                                                                        122,531
+87    Information Services                                                           120,893
+88    Logistics & Supply Chain                                                       116,958
+89    Pharmaceuticals                                                                110,369
+90    Broadcast Media                                                                109,607
+91    Ranching                                                                       102,467
+92    Consumer Electronics                                                           101,663
+93    Luxury Goods & Jewelry                                                          98,384
+94    Biotechnology                                                                   90,916
+95    Arts & Crafts                                                                   88,535
+96    Fine Art                                                                        85,762
+97    Writing & Editing                                                               83,957
+98    Industrial Automation                                                           81,552
+99    Airlines/Aviation                                                               76,942
+100   Investment Banking                                                              76,113
+101   Wine & Spirits                                                                  73,677
+102   Museums & Institutions                                                          72,461
+103   Venture Capital & Private Equity                                                70,569
+104   Computer Games                                                                  69,584
+105   Computer & Network Security                                                     64,768
+106   Executive Office                                                                62,499
+107   Import & Export                                                                 61,356
+108   Outsourcing/Offshoring                                                          58,034
+109   Commercial Real Estate                                                          55,640
+110   Packaging & Containers                                                          54,429
+111   Glass, Ceramics & Concrete                                                      49,278
+112   Defense & Space                                                                 48,915
+113   Aviation & Aerospace                                                            45,483
+114   Maritime                                                                        43,466
+115   Computer Hardware                                                               41,112
+116   Market Research                                                                 40,227
+117   Sporting Goods                                                                  39,332
+118   Dairy                                                                           37,329
+119   Translation & Localization                                                      36,543
+120   Public Safety                                                                   36,100
+121   Newspapers                                                                      35,159
+122   Alternative Medicine                                                            33,967
+123   Warehousing                                                                     30,857
+124   Capital Markets                                                                 29,846
+125   Semiconductors                                                                  29,680
+126   Political Organization                                                          29,379
+127   Think Tanks                                                                     28,669
+128   Computer Networking                                                             26,671
+129   Program Development                                                             26,644
+130   Philanthropy                                                                    26,344
+131   Animation                                                                       26,206
+132   Fishery                                                                         26,045
+133   Fundraising                                                                     24,811
+134   Law Enforcement                                                                 24,344
+135   Government Relations                                                            23,694
+136   Shipbuilding                                                                    23,550
+137   International Affairs                                                           19,834
+138   Gambling & Casinos                                                              16,946
+139   Tobacco                                                                         16,809
+140   Libraries                                                                       14,067
+141   Judiciary                                                                       13,913
+142   Wireless                                                                        12,084
+143   Public Policy                                                                   12,003
+144   Military                                                                        11,584
+145   Railroad Manufacture                                                             8,888
+146   Alternative Dispute Resolution                                                   8,430
+147   Nanotechnology                                                                   6,359
+148   Legislative Office                                                               1,755
+-----------------------------------------------------------------------------------------------
+TOTAL                                                                             54,404,808
+
+================================================================================
+CATEGORIZED BY MAJOR INDUSTRY GROUPS
+================================================================================
+
+
+Technology (11 industries, 4,688,116 companies):
+--------------------------------------------------------------------------------
+  • Information Technology & Services                                    1,668,978
+  • Computer Software                                                    1,527,551
+  • Non-profit Organization Management                                     592,553
+  • Internet                                                               478,731
+  • Information Services                                                   120,893
+  • Biotechnology                                                           90,916
+  • Computer Games                                                          69,584
+  • Computer & Network Security                                             64,768
+  • Computer Hardware                                                       41,112
+  • Computer Networking                                                     26,671
+
+Financial Services (6 industries, 1,620,423 companies):
+--------------------------------------------------------------------------------
+  • Financial Services                                                     795,324
+  • Insurance                                                              354,834
+  • Investment Management                                                  201,052
+  • Banking                                                                122,531
+  • Investment Banking                                                      76,113
+  • Venture Capital & Private Equity                                        70,569
+
+Healthcare (7 industries, 4,988,945 companies):
+--------------------------------------------------------------------------------
+  • Medical Practice                                                     2,238,734
+  • Hospital & Health Care                                                 954,263
+  • Health, Wellness & Fitness                                             751,219
+  • Hospitality                                                            631,940
+  • Medical Device                                                         175,771
+  • Mental Health Care                                                     126,649
+  • Pharmaceuticals                                                        110,369
+
+Professional Services (5 industries, 2,694,599 companies):
+--------------------------------------------------------------------------------
+  • Management Consulting                                                1,474,961
+  • Accounting                                                             415,423
+  • Legal Services                                                         296,071
+  • Human Resources                                                        254,115
+  • Staffing & Recruiting                                                  254,029
+
+Manufacturing (6 industries, 1,910,575 companies):
+--------------------------------------------------------------------------------
+  • Electrical & Electronic Manufacturing                                  482,616
+  • Automotive                                                             469,582
+  • Machinery                                                              371,415
+  • Mechanical Or Industrial Engineering                                   363,014
+  • Chemicals                                                              142,396
+  • Industrial Automation                                                   81,552
+
+Retail & Consumer (9 industries, 5,738,240 companies):
+--------------------------------------------------------------------------------
+  • Retail                                                               1,870,171
+  • Restaurants                                                          1,169,841
+  • Food & Beverages                                                       493,999
+  • Consumer Goods                                                         489,361
+  • Consumer Services                                                      486,702
+  • Wholesale                                                              395,093
+  • Apparel & Fashion                                                      368,921
+  • Food Production                                                        362,489
+  • Consumer Electronics                                                   101,663
+
+Real Estate & Construction (5 industries, 5,429,689 companies):
+--------------------------------------------------------------------------------
+  • Real Estate                                                          2,578,041
+  • Construction                                                         2,221,703
+  • Architecture & Planning                                                406,022
+  • Civil Engineering                                                      168,283
+  • Commercial Real Estate                                                  55,640
+
+Education (6 industries, 1,570,106 companies):
+--------------------------------------------------------------------------------
+  • Higher Education                                                       446,465
+  • Education Management                                                   411,164
+  • E-learning                                                             263,146
+  • Research                                                               225,746
+  • Primary/Secondary Education                                            183,358
+  • Market Research                                                         40,227
+
+Media & Entertainment (8 industries, 1,630,384 companies):
+--------------------------------------------------------------------------------
+  • Entertainment                                                          309,619
+  • Performing Arts                                                        283,357
+  • Media Production                                                       277,064
+  • Publishing                                                             246,018
+  • Music                                                                  182,119
+  • Online Media                                                           134,065
+  • Broadcast Media                                                        109,607
+  • Arts & Crafts                                                           88,535
+
+Other (85 industries, 24,133,731 companies):
+--------------------------------------------------------------------------------
+  • (empty)                                                             10,868,136
+  • Marketing & Advertising                                              1,292,113
+  • Individual & Family Services                                         1,222,575
+  • Civic & Social Organization                                            730,519
+  • Transportation/Trucking/Railroad                                       501,027
+  • Facilities Services                                                    474,685
+  • Sports                                                                 455,551
+  • Design                                                                 407,444
+  • Professional Training & Coaching                                       385,816
+  • Farming                                                                373,551
+
+================================================================================
