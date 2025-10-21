@@ -1,0 +1,59 @@
+# System files - NEVER commit
+.DS_Store
+.CFUserTextEncoding
+.bash_profile
+.bash_history
+.zsh_history
+.zprofile
+.zshrc
+.gitconfig
+.claude*
+.aws/
+.aws-sam/
+.ssh/
+.config/
+.local/
+.npm/
+.conda/
+.cursor/
+.docker/
+.terraform.d/
+.sonarlint/
+.render/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+
+# AWS
+.aws-sam/
+
+# Only commit project files
+# Everything else is excluded by default
