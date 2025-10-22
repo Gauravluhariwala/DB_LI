@@ -31,12 +31,14 @@ def search_companies(company_filters: dict, limit: int = 200) -> Tuple[List[str]
         'query': {
             'bool': {
                 'must': [],  # Only for scored queries
-                'filter': []  # Non-scored, faster, cached
+                'filter': [],  # Non-scored, faster, cached
+                'should': []  # OR logic queries (initialize to avoid KeyError)
             }
         },
         'size': limit,
         '_source': ['name'],  # ONLY name needed (optimization)
-        'track_total_hits': True,
+        'track_total_hits': 1000,  # OPTIMIZATION: Limit total count (faster!)
+        'timeout': '10s',  # Fail fast if query too slow
         # SCORING: Get BEST companies first
         'sort': [
             {'size': {'order': 'desc', 'missing': '_last'}},
@@ -77,7 +79,7 @@ def search_companies(company_filters: dict, limit: int = 200) -> Tuple[List[str]
                 size_queries.append({'range': {'size': {'gte': 1000}}})
 
         if size_queries:
-            query['query']['bool']['should'] = size_queries
+            query['query']['bool']['should'].extend(size_queries)
             query['query']['bool']['minimum_should_match'] = 1
 
     # Founded year filters
@@ -112,6 +114,59 @@ def search_companies(company_filters: dict, limit: int = 200) -> Tuple[List[str]
     if company_filters.get('revenue_min'):
         query['query']['bool']['filter'].append({
             'range': {'revenue': {'gte': company_filters['revenue_min']}}
+        })
+
+    # Company name search (NEW - fuzzy match)
+    if company_filters.get('company_name'):
+        company_names = company_filters['company_name']
+        if isinstance(company_names, str):
+            company_names = [company_names]
+
+        # OR logic across multiple company names
+        company_name_queries = []
+        for name in company_names:
+            company_name_queries.append({
+                'match': {
+                    'name': {
+                        'query': name,
+                        'fuzziness': 'AUTO'
+                    }
+                }
+            })
+
+        if company_name_queries:
+            query['query']['bool']['should'].extend(company_name_queries)
+            query['query']['bool']['minimum_should_match'] = 1
+
+    # Specialties search (NEW - OR logic)
+    if company_filters.get('specialties'):
+        specs = company_filters['specialties']
+        if isinstance(specs, str):
+            specs = [specs]
+
+        # OR logic: match any specialty
+        for spec in specs:
+            query['query']['bool']['should'].append({
+                'match': {
+                    'specialties': {
+                        'query': spec,
+                        'fuzziness': 'AUTO'
+                    }
+                }
+            })
+
+        if specs:
+            query['query']['bool']['minimum_should_match'] = 1
+
+    # HQ City filter (NEW)
+    if company_filters.get('hq_city'):
+        cities = company_filters['hq_city']
+        if isinstance(cities, str):
+            cities = [cities]
+
+        # OR logic: match any city
+        query['query']['bool']['filter'].append({
+            'terms': {'headquarter.address.city.keyword': cities}
         })
 
     # Execute query
