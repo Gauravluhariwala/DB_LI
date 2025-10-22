@@ -2,9 +2,9 @@
 
 **Production Endpoint:** https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/
 
-**Version:** 1.2.0
+**Version:** 1.2.1
 **Status:** 🟢 LIVE IN PRODUCTION
-**Last Updated:** October 22, 2025 (Enhanced with 15 new fields!)
+**Last Updated:** October 22, 2025 (Enhanced with 15 new fields + Individual Profile Lookup!)
 
 ---
 
@@ -111,7 +111,9 @@ curl -X POST 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.a
 
 ## API Endpoints
 
-### 1. POST /v1/search/sequential
+### Search Endpoints
+
+#### 1. POST /v1/search/sequential
 
 Main search endpoint for sequential company → people queries.
 
@@ -119,7 +121,69 @@ Main search endpoint for sequential company → people queries.
 **Rate Limit:** Unlimited (add API Gateway for rate limiting)
 **Timeout:** 29 seconds max
 
-### 2. POST /v1/specialties/search ⭐ NEW
+---
+
+### Individual Profile Endpoints ⭐ NEW v1.2.1
+
+#### 2. GET /v1/profiles/{publicId}
+
+Fetch a single LinkedIn profile by its publicId.
+
+**Authentication:** None (public endpoint)
+**Returns:** Complete profile with ALL 36 fields
+
+**Example:**
+```
+GET /v1/profiles/john-smith-12345
+GET /v1/profiles/siri-chauhan-1b35a4221
+```
+
+**Query Parameter:**
+- `include_fields` - Comma-separated list of fields (optional)
+
+**Example with filtering:**
+```
+GET /v1/profiles/john-smith-12345?include_fields=publicId,fullName,headline,skills
+```
+
+#### 3. POST /v1/profiles/batch
+
+Fetch multiple profiles (up to 100) in a single request.
+
+**Request:**
+```json
+{
+  "public_ids": ["id1", "id2", "id3"],
+  "include_fields": ["publicId", "fullName", "headline"]
+}
+```
+
+**Returns:**
+```json
+{
+  "profiles": [...],
+  "total_found": 2,
+  "total_requested": 3,
+  "not_found": ["id3"]
+}
+```
+
+#### 4. GET /v1/profiles/search/by-name/{fullName}
+
+Search profiles by exact full name (for name disambiguation).
+
+**Example:**
+```
+GET /v1/profiles/search/by-name/John%20Smith?limit=10
+```
+
+**Use Case:** When multiple people have the same name
+
+---
+
+### Semantic Search Endpoints
+
+#### 5. POST /v1/specialties/search
 
 Semantic vector search for company specialties (AI-powered similarity matching).
 
@@ -127,14 +191,14 @@ Semantic vector search for company specialties (AI-powered similarity matching).
 **Rate Limit:** Unlimited
 **Database:** 44,899 unique specialties from 54M companies
 
-### 3. POST /v1/specialties/expand ⭐ NEW
+#### 6. POST /v1/specialties/expand
 
 Expand a search term to include semantically similar specialties.
 
 **Authentication:** None (public endpoint)
 **Use Case:** Query expansion for better search recall
 
-### 4. GET /v1/specialties/stats ⭐ NEW
+#### 7. GET /v1/specialties/stats
 
 Get statistics about the specialty vector database.
 
@@ -1062,6 +1126,14 @@ curl -X POST 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.a
 
 ## Changelog
 
+### v1.2.1 (October 22, 2025) ⭐ NEW
+- ✅ **Individual Profile Lookup** - GET /v1/profiles/{publicId}
+- ✅ **Batch Profile Fetch** - POST /v1/profiles/batch (up to 100 profiles)
+- ✅ **Search by Name** - GET /v1/profiles/search/by-name/{fullName}
+- ✅ **ALL 36 Fields Returned** - Including courses, honors, patents, publications, etc.
+- ✅ **Field Filtering** - Optional include_fields parameter
+- ✅ **Production Ready** - Tested and deployed
+
 ### v1.2.0 (October 22, 2025) ⭐ MAJOR UPDATE
 - ✅ **15 New Essential Fields** - Comprehensive search capabilities
 - ✅ **Name Search** - Find people by name (fuzzy matching)
@@ -1098,4 +1170,79 @@ curl -X POST 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.a
 
 **API is live and ready for production use!** 🚀
 
-**Latest (v1.2.0):** 29 searchable fields with OR logic arrays and query performance optimization!
+**Latest (v1.2.1):**
+- 29 searchable fields with OR logic arrays
+- Individual profile lookup with ALL 36 fields
+- Batch profile fetch (up to 100 profiles)
+- Search by name for disambiguation
+
+---
+
+## Individual Profile Lookup - Curl Examples
+
+### Get Single Profile (All Fields)
+
+```bash
+curl https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/v1/profiles/siri-chauhan-1b35a4221
+```
+
+**Returns:** Complete profile with ALL 37 fields
+
+### Get Profile with Field Filtering
+
+```bash
+curl 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/v1/profiles/siri-chauhan-1b35a4221?include_fields=publicId,fullName,headline,skills,educations'
+```
+
+**Returns:** Only specified fields (faster, smaller payload)
+
+### Batch Profile Fetch
+
+```bash
+curl -X POST 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/v1/profiles/batch' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "public_ids": ["siri-chauhan-1b35a4221", "tariq4nwar", "sana-begum-869b47292"],
+    "include_fields": ["publicId", "fullName", "headline", "skills", "current_company_extracted"]
+  }'
+```
+
+**Response:**
+```json
+{
+  "profiles": [
+    {"publicId": "...", "fullName": "...", ...},
+    {"publicId": "...", "fullName": "...", ...}
+  ],
+  "total_found": 3,
+  "total_requested": 3,
+  "not_found": []
+}
+```
+
+### Search by Name
+
+```bash
+curl 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/v1/profiles/search/by-name/Kumar?limit=10'
+```
+
+**Returns:** Up to 10 people named "Kumar"
+
+### All 37 Fields Included
+
+When fetching a profile without field filtering, you get:
+
+- **Basic:** publicId, fullName, firstName, lastName, headline, summary, pronoun, urn, logoUrl
+- **Location:** locationName, locationCountry
+- **Experience:** seniority_level, total_experience_years, total_experience_range, years_in_current_role, years_in_current_role_range, current_company_extracted, current_title_extracted
+- **Network:** connectionsCount, followersCount, industry
+- **Skills:** skills array
+- **Education:** educations (school, degree, fieldOfStudy, years)
+- **Work History:** currentCompanies, previousCompanies (with positions, descriptions, dates)
+- **Credentials:** certifications, courses
+- **Activities:** languages, projects, publications, patents, honors, recommendations, organizations, volunteerExperiences
+- **Meta:** lastUpdated, _index
+
+**Total: 37 fields** (everything from LinkedIn!)
+
+---

@@ -14,8 +14,10 @@ from app.models.specialty_request import (
     SpecialtySearchRequest, SpecialtySearchResponse,
     SpecialtyExpansionRequest, SpecialtyExpansionResponse
 )
+from app.models.profile_response import ProfileResponse, BatchProfileRequest, BatchProfileResponse
 from app.services import sequential_service_optimized as sequential_service
 from app.services.chroma_service import chroma_service
+from app.services import profile_service
 from app.config import settings
 
 # Initialize FastAPI
@@ -39,10 +41,16 @@ async def root():
     """API root endpoint"""
     return {
         "api": settings.api_title,
-        "version": settings.api_version,
+        "version": "1.2.1",
         "status": "active",
         "endpoints": {
             "sequential_search": "/v1/search/sequential",
+            "profile_by_id": "/v1/profiles/{publicId}",
+            "profiles_batch": "/v1/profiles/batch",
+            "search_by_name": "/v1/profiles/search/by-name/{fullName}",
+            "specialty_search": "/v1/specialties/search",
+            "specialty_expand": "/v1/specialties/expand",
+            "specialty_stats": "/v1/specialties/stats",
             "health": "/health",
             "docs": "/docs"
         }
@@ -249,3 +257,144 @@ async def get_specialty_stats():
         return stats
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================
+# Individual Profile Lookup Endpoints
+# ============================================================
+
+@app.get("/v1/profiles/{public_id}", response_model=ProfileResponse)
+async def get_profile(public_id: str, include_fields: str = None):
+    """
+    Fetch a single LinkedIn profile by publicId
+
+    **Path Parameter:**
+    - public_id: LinkedIn public ID (e.g., "john-smith-12345")
+
+    **Query Parameter:**
+    - include_fields: Comma-separated list of fields to return (optional)
+
+    **Example:**
+    ```
+    GET /v1/profiles/john-smith-12345
+    GET /v1/profiles/john-smith-12345?include_fields=publicId,fullName,headline
+    ```
+
+    **Returns:** Complete profile data or 404 if not found
+
+    **Use Cases:**
+    - Get full profile details for a specific person
+    - Enrich existing data with LinkedIn profile
+    - Build profile detail pages
+    """
+    # Parse include_fields if provided
+    fields_list = None
+    if include_fields:
+        fields_list = [f.strip() for f in include_fields.split(',')]
+
+    try:
+        profile = profile_service.get_profile_by_id(public_id, include_fields=fields_list)
+
+        if profile:
+            return profile
+        else:
+            raise HTTPException(status_code=404, detail=f"Profile not found: {public_id}")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Profile fetch error: {str(e)}")
+
+
+@app.post("/v1/profiles/batch", response_model=BatchProfileResponse)
+async def get_profiles_batch(request: BatchProfileRequest):
+    """
+    Fetch multiple LinkedIn profiles by publicIds (batch lookup)
+
+    **Request:**
+    ```json
+    {
+      "public_ids": ["john-smith-12345", "jane-doe-67890"],
+      "include_fields": ["publicId", "fullName", "headline"]
+    }
+    ```
+
+    **Limits:**
+    - Max 100 profiles per request
+    - Profiles not found are listed in "not_found" array
+
+    **Returns:**
+    ```json
+    {
+      "profiles": [
+        {"publicId": "john-smith-12345", "fullName": "John Smith", ...},
+        {"publicId": "jane-doe-67890", "fullName": "Jane Doe", ...}
+      ],
+      "total_found": 2,
+      "total_requested": 2,
+      "not_found": []
+    }
+    ```
+
+    **Use Cases:**
+    - Bulk profile enrichment
+    - Fetch profiles for a list of IDs
+    - Build contact lists with full details
+    """
+    try:
+        profiles = profile_service.get_profiles_batch(
+            public_ids=request.public_ids,
+            include_fields=request.include_fields
+        )
+
+        # Find which IDs weren't found
+        found_ids = {p['publicId'] for p in profiles}
+        not_found = [pid for pid in request.public_ids if pid not in found_ids]
+
+        return {
+            "profiles": profiles,
+            "total_found": len(profiles),
+            "total_requested": len(request.public_ids),
+            "not_found": not_found
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Batch fetch error: {str(e)}")
+
+
+@app.get("/v1/profiles/search/by-name/{full_name}")
+async def search_by_name(full_name: str, limit: int = 10):
+    """
+    Search profiles by exact full name (for name disambiguation)
+
+    **Path Parameter:**
+    - full_name: Full name to search (e.g., "John Smith")
+
+    **Query Parameter:**
+    - limit: Max results (default: 10, max: 50)
+
+    **Example:**
+    ```
+    GET /v1/profiles/search/by-name/John%20Smith
+    GET /v1/profiles/search/by-name/John%20Smith?limit=20
+    ```
+
+    **Returns:** List of profiles with matching names
+
+    **Use Case:**
+    - When multiple people have the same name
+    - Name disambiguation
+    - "Which John Smith did you mean?"
+    """
+    try:
+        limit = min(limit, 50)  # Cap at 50
+        profiles = profile_service.search_profiles_by_name_exact(full_name, limit=limit)
+
+        return {
+            "query": full_name,
+            "results": profiles,
+            "total_found": len(profiles)
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Name search error: {str(e)}")
+
