@@ -23,6 +23,12 @@ class CompanyCriteria(BaseModel):
     # Company identification
     company_name: Optional[List[str]] = Field(None, description="Company names (OR logic, fuzzy match)")
     specialties: Optional[List[str]] = Field(None, description="Company specialties/tags (OR logic)")
+    domain: Optional[List[str]] = Field(None, description="Website domains (OR logic, exact match)")
+
+    # Funding filters (NEW)
+    funding_round: Optional[List[str]] = Field(None, description="Funding stages (OR logic): Seed, Series A, Series B, etc.")
+    lead_investor: Optional[List[str]] = Field(None, description="Lead investor/VC names (OR logic, fuzzy match)")
+    min_funding_rounds: Optional[int] = Field(None, description="Minimum number of funding rounds")
 
 class PeopleCriteria(BaseModel):
     """People filter criteria"""

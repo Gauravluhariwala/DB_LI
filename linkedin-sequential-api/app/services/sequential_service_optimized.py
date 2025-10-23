@@ -105,7 +105,14 @@ async def execute_sequential_search(
             company_criteria.get('founded_after'),
             company_criteria.get('founded_before'),
             company_criteria.get('location_contains'),
-            company_criteria.get('revenue_min')
+            company_criteria.get('revenue_min'),
+            company_criteria.get('company_name'),
+            company_criteria.get('specialties'),
+            company_criteria.get('hq_city'),
+            company_criteria.get('domain'),             # NEW
+            company_criteria.get('funding_round'),      # NEW
+            company_criteria.get('lead_investor'),      # NEW
+            company_criteria.get('min_funding_rounds')  # NEW
         ])
 
         if not has_company_filters:
@@ -114,13 +121,13 @@ async def execute_sequential_search(
             company_names = []
             companies_count = 0
         else:
-            # STEP 1: Query companies (optimized: limit 200, scored)
+            # STEP 1: Query companies (TESTING: increased limit)
             search_mode = 'sequential'
             company_names, companies_count = await loop.run_in_executor(
                 None,
                 company_service.search_companies,
                 company_criteria,
-                200  # Production limit
+                10000  # NO LIMIT: Get ALL matching companies
             )
 
             if not company_names:

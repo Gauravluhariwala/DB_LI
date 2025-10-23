@@ -24,7 +24,7 @@ def search_companies(company_filters: dict, limit: int = 200) -> Tuple[List[str]
     Returns:
         Tuple of (company_names, total_matched)
     """
-    limit = min(limit, 10000)  # TESTING: Increased cap from 500 to 2000
+    limit = min(limit, 2000)  # TESTING: Increased cap from 500 to 2000
 
     # Build OpenSearch query
     query = {
@@ -37,7 +37,7 @@ def search_companies(company_filters: dict, limit: int = 200) -> Tuple[List[str]
         },
         'size': limit,
         '_source': ['name'],  # ONLY name needed (optimization)
-        'track_total_hits': True,  # OPTIMIZATION: Limit total count (faster!)
+        'track_total_hits': 1000,  # OPTIMIZATION: Limit total count (faster!)
         'timeout': '10s'  # Fail fast if query too slow
         # NOTE: Sort will be set conditionally below based on filters
     }

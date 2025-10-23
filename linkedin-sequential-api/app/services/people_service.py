@@ -43,7 +43,7 @@ def search_people_at_companies(
             }
         },
         'size': page_size,
-        'track_total_hits': 10000,  # OPTIMIZATION: Only count up to 10K (50-80% faster!)
+        'track_total_hits': True,  # OPTIMIZATION: Only count up to 10K (50-80% faster!)
         'timeout': '15s',  # Fail fast instead of blocking
         # FIELD FILTERING: Return only essential fields (70% payload reduction)
         '_source': {
@@ -80,15 +80,16 @@ def search_people_at_companies(
         # No company filter - shouldn't happen in sequential search
         pass
 
-    # Job title (headline search) - NOW SUPPORTS ARRAY
+    # Job title (headline search) - ARRAY with OR logic (REQUIRED filter)
     if people_filters.get('job_title'):
         job_titles = people_filters['job_title']
         if isinstance(job_titles, str):
             job_titles = [job_titles]
 
-        # OR logic: match any job title
+        # Create nested bool: Must match at least ONE job title (OR within array, AND across fields)
+        title_queries = []
         for title in job_titles:
-            query['query']['bool']['should'].append({
+            title_queries.append({
                 'multi_match': {
                     'query': title,
                     'fields': ['headline^2', 'currentCompanies.positions.title'],
@@ -97,25 +98,34 @@ def search_people_at_companies(
                 }
             })
 
-        if job_titles:
-            if 'minimum_should_match' not in query['query']['bool']:
-                query['query']['bool']['minimum_should_match'] = 1
+        if title_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': title_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
-    # Location - NOW SUPPORTS ARRAY
+    # Location - ARRAY with OR logic (REQUIRED filter)
     if people_filters.get('location'):
         locations = people_filters['location']
         if isinstance(locations, str):
             locations = [locations]
 
-        # OR logic: match any location
+        # Create nested bool: Must match at least ONE location (use match_phrase for exact matching)
+        location_queries = []
         for loc in locations:
-            query['query']['bool']['should'].append({
-                'match': {'locationName': loc}
+            location_queries.append({
+                'match_phrase': {'locationName': loc}  # Exact phrase to avoid "San" matching "San Antonio"
             })
 
-        if locations:
-            if 'minimum_should_match' not in query['query']['bool']:
-                query['query']['bool']['minimum_should_match'] = 1
+        if location_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': location_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
     # Location Country (NEW - consistency with company)
     if people_filters.get('location_country'):
@@ -154,17 +164,26 @@ def search_people_at_companies(
             'terms': {'years_in_current_role_range': role_ranges}
         })
 
-    # Skills
+    # Skills - ARRAY with OR logic (REQUIRED filter)
     if people_filters.get('skills'):
         skills = people_filters['skills']
         if isinstance(skills, str):
             skills = [skills]
+
+        # Create nested bool: Must have at least ONE skill
+        skill_queries = []
         for skill in skills:
-            query['query']['bool']['should'].append({
+            skill_queries.append({
                 'match': {'skills': skill}
             })
-        if skills:
-            query['query']['bool']['minimum_should_match'] = 1
+
+        if skill_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': skill_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
     # Industry
     if people_filters.get('industry'):
@@ -177,14 +196,16 @@ def search_people_at_companies(
 
     # ========== NEW FILTERS BELOW ==========
 
-    # Name search (NEW - fuzzy match on fullName, firstName, lastName)
+    # Name search (NEW - fuzzy match on fullName, firstName, lastName) - REQUIRED filter
     if people_filters.get('name'):
         names = people_filters['name']
         if isinstance(names, str):
             names = [names]
 
+        # Create nested bool: Must match at least ONE name
+        name_queries = []
         for name in names:
-            query['query']['bool']['should'].append({
+            name_queries.append({
                 'multi_match': {
                     'query': name,
                     'fields': ['fullName^2', 'firstName', 'lastName'],
@@ -193,17 +214,24 @@ def search_people_at_companies(
                 }
             })
 
-        if names and 'minimum_should_match' not in query['query']['bool']:
-            query['query']['bool']['minimum_should_match'] = 1
+        if name_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': name_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
-    # Current Title Extracted (NEW - more accurate than headline)
+    # Current Title Extracted (NEW - more accurate than headline) - REQUIRED filter
     if people_filters.get('current_title_extracted'):
         titles = people_filters['current_title_extracted']
         if isinstance(titles, str):
             titles = [titles]
 
+        # Create nested bool: Must match at least ONE title
+        title_queries = []
         for title in titles:
-            query['query']['bool']['should'].append({
+            title_queries.append({
                 'match': {
                     'current_title_extracted': {
                         'query': title,
@@ -212,8 +240,13 @@ def search_people_at_companies(
                 }
             })
 
-        if titles and 'minimum_should_match' not in query['query']['bool']:
-            query['query']['bool']['minimum_should_match'] = 1
+        if title_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': title_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
     # Job Description Contains (NEW - dot notation for object type)
     if people_filters.get('job_description_contains'):
@@ -239,28 +272,33 @@ def search_people_at_companies(
             'terms': {'currentCompanies.positions.employmentType.keyword': emp_types}
         })
 
-    # Job Location (NEW - object type, use dot notation)
+    # Job Location (NEW) - REQUIRED filter
     if people_filters.get('job_location'):
         job_locs = people_filters['job_location']
         if isinstance(job_locs, str):
             job_locs = [job_locs]
 
-        for loc in job_locs:
-            query['query']['bool']['should'].append({
-                'match': {'currentCompanies.positions.location': loc}
+        # Create nested bool: Must match at least ONE job location
+        loc_queries = [{'match': {'currentCompanies.positions.location': loc}} for loc in job_locs]
+
+        if loc_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': loc_queries,
+                    'minimum_should_match': 1
+                }
             })
 
-        if job_locs and 'minimum_should_match' not in query['query']['bool']:
-            query['query']['bool']['minimum_should_match'] = 1
-
-    # Education School (NEW - object type, use dot notation)
+    # Education School (NEW) - REQUIRED filter
     if people_filters.get('education_school'):
         schools = people_filters['education_school']
         if isinstance(schools, str):
             schools = [schools]
 
+        # Create nested bool: Must have attended at least ONE school
+        school_queries = []
         for school in schools:
-            query['query']['bool']['should'].append({
+            school_queries.append({
                 'match': {
                     'educations.school.name': {
                         'query': school,
@@ -269,17 +307,24 @@ def search_people_at_companies(
                 }
             })
 
-        if schools and 'minimum_should_match' not in query['query']['bool']:
-            query['query']['bool']['minimum_should_match'] = 1
+        if school_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': school_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
-    # Education Degree (NEW - object type, use dot notation)
+    # Education Degree (NEW) - REQUIRED filter
     if people_filters.get('education_degree'):
         degrees = people_filters['education_degree']
         if isinstance(degrees, str):
             degrees = [degrees]
 
+        # Create nested bool: Must have at least ONE degree type
+        degree_queries = []
         for degree in degrees:
-            query['query']['bool']['should'].append({
+            degree_queries.append({
                 'match': {
                     'educations.degree': {
                         'query': degree,
@@ -288,17 +333,24 @@ def search_people_at_companies(
                 }
             })
 
-        if degrees and 'minimum_should_match' not in query['query']['bool']:
-            query['query']['bool']['minimum_should_match'] = 1
+        if degree_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': degree_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
-    # Education Field of Study (NEW - object type, use dot notation)
+    # Education Field of Study (NEW) - REQUIRED filter
     if people_filters.get('education_field'):
         fields = people_filters['education_field']
         if isinstance(fields, str):
             fields = [fields]
 
+        # Create nested bool: Must have studied at least ONE field
+        field_queries = []
         for field in fields:
-            query['query']['bool']['should'].append({
+            field_queries.append({
                 'match': {
                     'educations.fieldOfStudy': {
                         'query': field,
@@ -307,8 +359,13 @@ def search_people_at_companies(
                 }
             })
 
-        if fields and 'minimum_should_match' not in query['query']['bool']:
-            query['query']['bool']['minimum_should_match'] = 1
+        if field_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': field_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
     # Graduated After/Before (NEW - range query on object field)
     if people_filters.get('graduated_after') or people_filters.get('graduated_before'):
@@ -332,14 +389,16 @@ def search_people_at_companies(
             }
         })
 
-    # Previous Company (NEW - object type, use dot notation)
+    # Previous Company (NEW) - REQUIRED filter
     if people_filters.get('previous_company'):
         prev_companies = people_filters['previous_company']
         if isinstance(prev_companies, str):
             prev_companies = [prev_companies]
 
+        # Create nested bool: Must have worked at at least ONE company
+        prev_queries = []
         for company in prev_companies:
-            query['query']['bool']['should'].append({
+            prev_queries.append({
                 'match': {
                     'previousCompanies.company.name': {
                         'query': company,
@@ -348,17 +407,24 @@ def search_people_at_companies(
                 }
             })
 
-        if prev_companies and 'minimum_should_match' not in query['query']['bool']:
-            query['query']['bool']['minimum_should_match'] = 1
+        if prev_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': prev_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
-    # Certifications (NEW - object type, use dot notation)
+    # Certifications (NEW) - REQUIRED filter
     if people_filters.get('certifications'):
         certs = people_filters['certifications']
         if isinstance(certs, str):
             certs = [certs]
 
+        # Create nested bool: Must have at least ONE certification
+        cert_queries = []
         for cert in certs:
-            query['query']['bool']['should'].append({
+            cert_queries.append({
                 'match': {
                     'certifications.name': {
                         'query': cert,
@@ -367,8 +433,13 @@ def search_people_at_companies(
                 }
             })
 
-        if certs and 'minimum_should_match' not in query['query']['bool']:
-            query['query']['bool']['minimum_should_match'] = 1
+        if cert_queries:
+            query['query']['bool']['must'].append({
+                'bool': {
+                    'should': cert_queries,
+                    'minimum_should_match': 1
+                }
+            })
 
     # Sort by relevance score
     query['sort'] = [
