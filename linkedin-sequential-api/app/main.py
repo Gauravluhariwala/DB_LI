@@ -10,13 +10,8 @@ import time
 
 from app.models.request import SequentialSearchRequest
 from app.models.response import SequentialSearchResponse
-from app.models.specialty_request import (
-    SpecialtySearchRequest, SpecialtySearchResponse,
-    SpecialtyExpansionRequest, SpecialtyExpansionResponse
-)
 from app.models.profile_response import ProfileResponse, BatchProfileRequest, BatchProfileResponse
 from app.services import sequential_service_optimized as sequential_service
-from app.services.chroma_service import chroma_service
 from app.services import profile_service
 from app.config import settings
 
@@ -41,16 +36,13 @@ async def root():
     """API root endpoint"""
     return {
         "api": settings.api_title,
-        "version": "1.2.1",
+        "version": "1.3.0",
         "status": "active",
         "endpoints": {
             "sequential_search": "/v1/search/sequential",
             "profile_by_id": "/v1/profiles/{publicId}",
             "profiles_batch": "/v1/profiles/batch",
             "search_by_name": "/v1/profiles/search/by-name/{fullName}",
-            "specialty_search": "/v1/specialties/search",
-            "specialty_expand": "/v1/specialties/expand",
-            "specialty_stats": "/v1/specialties/stats",
             "health": "/health",
             "docs": "/docs"
         }
@@ -139,124 +131,6 @@ if __name__ == "__main__":
     # For local testing
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-# ============================================================
-# Semantic Specialty Search Endpoints (Chroma Vector DB)
-# ============================================================
-
-@app.post("/v1/specialties/search", response_model=SpecialtySearchResponse)
-async def search_specialties(request: SpecialtySearchRequest):
-    """
-    Semantic search for company specialties using Chroma vector database
-
-    Find specialties similar to your query using AI-powered semantic matching.
-
-    Example:
-    {
-      "query": "artificial intelligence",
-      "n_results": 10
-    }
-
-    Returns specialties semantically similar to "artificial intelligence":
-    - AI
-    - Machine Learning  
-    - Deep Learning
-    - Neural Networks
-    - Data Science
-
-    Use Cases:
-    - Find related specialties
-    - Discover similar tags
-    - Expand search queries
-    """
-    try:
-        results = chroma_service.search_similar_specialties(
-            query=request.query,
-            n_results=request.n_results,
-            min_count=request.min_count,
-            sort_by_count=request.sort_by_count
-        )
-
-        stats = chroma_service.get_specialty_stats()
-
-        return {
-            "query": request.query,
-            "results": results,
-            "total_results": len(results),
-            "metadata": {
-                "total_specialties_in_db": stats.get('total_specialties', 0),
-                "search_method": "semantic_vector_similarity",
-                "embedding_model": "all-MiniLM-L6-v2"
-            }
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Specialty search error: {str(e)}")
-
-@app.post("/v1/specialties/expand", response_model=SpecialtyExpansionResponse)
-async def expand_specialty_query(request: SpecialtyExpansionRequest):
-    """
-    Expand a search term to include semantically similar specialties
-
-    Use this to enhance company searches by including related terms.
-
-    Example:
-    {
-      "query": "blockchain",
-      "expansion_count": 5
-    }
-
-    Returns:
-    {
-      "original_query": "blockchain",
-      "expanded_terms": [
-        "Blockchain",
-        "Web3",
-        "Crypto",
-        "Smart Contracts",
-        "DeFi"
-      ],
-      "count": 5
-    }
-
-    Use Case:
-    User searches for "AI companies"
-    → Expand to companies with: ["AI", "Artificial Intelligence", "Machine Learning"]
-    → Get 3x more results!
-    """
-    try:
-        expanded = chroma_service.expand_specialty_query(
-            user_query=request.query,
-            expansion_count=request.expansion_count
-        )
-
-        return {
-            "original_query": request.query,
-            "expanded_terms": expanded,
-            "count": len(expanded)
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Expansion error: {str(e)}")
-
-@app.get("/v1/specialties/stats")
-async def get_specialty_stats():
-    """
-    Get statistics about the specialty vector database
-
-    Returns:
-    {
-      "total_specialties": 44899,
-      "database": "Tags",
-      "collection": "company_specialties",
-      "status": "active"
-    }
-    """
-    try:
-        stats = chroma_service.get_specialty_stats()
-        return stats
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================
 # Individual Profile Lookup Endpoints
