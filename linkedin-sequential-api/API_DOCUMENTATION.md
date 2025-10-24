@@ -2,9 +2,9 @@
 
 **Production Endpoint:** https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/
 
-**Version:** 1.2.1
+**Version:** 1.3.4
 **Status:** 🟢 LIVE IN PRODUCTION
-**Last Updated:** October 22, 2025 (Enhanced with 15 new fields + Individual Profile Lookup!)
+**Last Updated:** October 24, 2025 (Critical Fixes + Funding Filters + Enhanced Response!)
 
 ---
 
@@ -1363,3 +1363,308 @@ This transparency helps verify search accuracy and see real job titles.
 - ✅ More precise results (80% accuracy)
 
 ---
+# LinkedIn Sequential Search API - Complete Documentation v1.3.4
+
+**Production Endpoint:** https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/
+
+**Version:** 1.3.4  
+**Status:** 🟢 LIVE IN PRODUCTION  
+**Last Updated:** October 24, 2025
+
+---
+
+## Overview
+
+Search 815 million LinkedIn profiles and 54 million companies with comprehensive filtering.
+
+**Key Features:**
+- 13 company filters (including funding, investors, domains)
+- 23 people filters (name, education, job history, certifications)  
+- Individual profile lookup (all 37 fields)
+- Batch operations (up to 100 profiles)
+- No company limits (uses ALL matching companies)
+- Precise job title matching (80% accuracy)
+- Returns actual position titles (not just headlines)
+
+---
+
+## Quick Start
+
+### Example: Customer Success Leaders in Gurgaon
+
+```bash
+curl -X POST 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/v1/search/sequential' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "company_criteria": {},
+    "people_criteria": {
+      "job_title": ["Head of Customer Success", "Customer Success Manager"],
+      "location": ["Gurgaon", "Gurugram"]
+    },
+    "page": 1,
+    "page_size": 10
+  }'
+```
+
+**Returns:** ~1,000 Customer Success professionals with actual position titles
+
+---
+
+## Complete Request Schema
+
+```typescript
+{
+  company_criteria: {
+    // === BASIC FILTERS ===
+    industry?: string[]                    // Industry categories
+    size?: string[]                        // ["1_10", "11_50", "51_200", "201_500", "501_1000", "1000+"]
+    founded_after?: number                 // Year (>=)
+    founded_before?: number                // Year (<=)
+    location_country?: string              // Country code
+    location_contains?: string             // Text search in location/overview
+    revenue_min?: number                   // Minimum revenue
+    
+    // === COMPANY IDENTIFICATION ===
+    company_name?: string[]                // Company names (OR logic, tiered matching)
+    specialties?: string[]                 // Company tags (OR logic)
+    hq_city?: string[]                     // Headquarter cities (OR logic)
+    domain?: string[]                      // Website domains (OR logic, exact)
+    
+    // === FUNDING FILTERS (NEW v1.3.2) ===
+    funding_round?: string[]               // 27 types: "Pre-seed", "Seed", "Series A" through "Series J"
+    lead_investor?: string[]               // VC names: "Y Combinator", "Sequoia", "a16z", etc.
+    min_funding_rounds?: number            // Minimum number of funding rounds
+  },
+  
+  people_criteria: {
+    // === JOB & TITLE ===
+    job_title?: string[]                   // Job titles (OR logic, operator:and matching)
+    current_title_extracted?: string[]     // Extracted titles (more accurate)
+    job_description_contains?: string      // Keyword in job description
+    job_location?: string[]                // Job location (may differ from person location)
+    employment_type?: string[]             // ["Full-time", "Part-time", "Contract"]
+    started_current_job_after?: number     // Started job after year
+    
+    // === IDENTITY & LOCATION ===
+    name?: string[]                        // Names (OR logic)
+    location?: string[]                    // Locations (OR logic, phrase match)
+    location_country?: string[]            // Country codes (OR logic)
+    
+    // === EXPERIENCE & SENIORITY ===
+    seniority?: string[]                   // ["junior", "mid_level", "manager", "senior", "c_level"]
+    years_of_experience?: string[]         // ["0_2", "2_6", "6_10", "10_15", "15"]
+    years_in_current_role?: string[]       // ["0_2", "2_6", "6_10", "10"]
+    
+    // === SKILLS & INDUSTRY ===
+    skills?: string[]                      // Skills (OR logic)
+    industry?: string[]                    // Industry
+    
+    // === EDUCATION ===
+    education_school?: string[]            // Schools (OR logic)
+    education_degree?: string[]            // Degrees (OR logic)
+    education_field?: string[]             // Fields of study (OR logic)
+    graduated_after?: number               // Graduated after year
+    graduated_before?: number              // Graduated before year
+    
+    // === WORK HISTORY ===
+    previous_company?: string[]            // Past employers (OR logic)
+    
+    // === PROFILE CONTENT ===
+    summary_contains?: string              // Keyword in bio
+    
+    // === CREDENTIALS ===
+    certifications?: string[]              // Certifications (OR logic)
+  },
+  
+  page: number,                            // Page number (1-20)
+  page_size: number,                       // Results per page (10-50)
+  session_token?: string,                  // For pages 2+
+  cursor?: string                          // For pages >20
+}
+```
+
+---
+
+## Response Structure (v1.3.4 Enhanced)
+
+```json
+{
+  "status": "success",
+  "results": [
+    {
+      "publicId": "harsh-banger-123",
+      "fullName": "Harsh Banger",
+      "headline": "All things Customer Success || Scaling...",
+      "current_title_extracted": "Head of Customer Success",
+      "currentCompanies": [
+        {
+          "company": {"name": "Leena AI"},
+          "positions": [
+            {
+              "title": "Head of Customer Success",
+              "location": "India",
+              "startDateYear": 2021,
+              "employmentType": "Full-time"
+            }
+          ]
+        }
+      ],
+      "current_company_extracted": "Leena AI",
+      "locationName": "Gurugram, Haryana, India",
+      "locationCountry": "IN",
+      "seniority_level": "senior",
+      "total_experience_years": 10,
+      "skills": ["Customer Success", "SaaS", "Account Management"]
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "page_size": 10,
+    "total_results": 1015,
+    "has_next": true
+  },
+  "metadata": {
+    "companies_matched": 7547,
+    "companies_used": 6742,
+    "profiles_matched": 1015,
+    "query_time_ms": 1200
+  }
+}
+```
+
+**NEW in v1.3.4:**
+- ✅ `currentCompanies` - Full current job data with positions
+- ✅ `current_title_extracted` - Extracted current title
+- ✅ Can see ACTUAL position title vs headline
+
+---
+
+## Funding Round Types (27 Available)
+
+**Early Stage:**
+- "Pre-seed" (24K companies)
+- "Seed" (59K companies)
+- "Angel" (5K companies)
+
+**Growth Stage:**
+- "Series A" (16K companies)
+- "Series B" (7K companies)  
+- "Series C" (3K companies)
+- "Series D" (1K companies)
+
+**Late Stage:**
+- "Series E" through "Series J"
+
+**Public:**
+- "Post IPO equity", "Post IPO debt", "Post IPO secondary"
+
+**Other:**
+- "Grant", "Private equity", "Debt financing", etc.
+
+**Usage:**
+```json
+{
+  "company_criteria": {
+    "funding_round": ["Pre-seed", "Seed", "Series A", "Series B"]
+  }
+}
+```
+
+---
+
+## Example Queries
+
+### 1. Y Combinator AI Startups in SF
+```bash
+curl -X POST 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/v1/search/sequential' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "company_criteria": {
+      "lead_investor": ["Y Combinator"],
+      "specialties": ["Artificial Intelligence"],
+      "funding_round": ["Seed", "Series A"],
+      "hq_city": ["San Francisco"]
+    },
+    "people_criteria": {
+      "job_title": ["Software Engineer", "Founder"]
+    },
+    "page": 1,
+    "page_size": 10
+  }'
+```
+
+**Results:** ~58 people at YC-backed AI startups in SF
+
+---
+
+### 2. Customer Success Leaders in Gurgaon
+```bash
+curl -X POST 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/v1/search/sequential' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "company_criteria": {},
+    "people_criteria": {
+      "job_title": [
+        "Head of Customer Success",
+        "Customer Success Manager",
+        "Director of Customer Success",
+        "VP Customer Success"
+      ],
+      "location": ["Gurgaon", "Gurugram"]
+    },
+    "page": 1,
+    "page_size": 10
+  }'
+```
+
+**Results:** ~1,015 Customer Success leaders
+
+---
+
+### 3. Ex-Google Employees at Startups
+```bash
+curl -X POST 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.aws/v1/search/sequential' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "company_criteria": {
+      "size": ["11_50", "51_200"],
+      "funding_round": ["Seed", "Series A", "Series B"]
+    },
+    "people_criteria": {
+      "previous_company": ["Google"],
+      "seniority": ["senior"]
+    },
+    "page": 1,
+    "page_size": 10
+  }'
+```
+
+---
+
+## Changelog
+
+### v1.3.4 (October 24, 2025)
+- ✅ **Added currentCompanies to response** - See actual position titles
+- ✅ **Added current_title_extracted** - Extracted job title
+- ✅ **Enhanced transparency** - Verify why results matched
+
+### v1.3.3 (October 24, 2025)
+- ✅ **Fixed max_clause_count error** - Removed fuzzy matching
+- ✅ **operator:and for job titles** - 80% accuracy, precise matching
+- ✅ **No fuzzy expansion** - Prevents 1024 clause explosion
+
+### v1.3.2 (October 24, 2025)
+- ✅ **Critical bug fixes** - Location, company name, specialties
+- ✅ **Added 4 funding filters** - funding_round, lead_investor, min_funding_rounds, domain
+- ✅ **Removed company limits** - Now uses ALL matching companies (10,000 cap)
+- ✅ **8.8x improvement** - 364 → 3,204 results for SF AI engineers
+
+### v1.2.0-1.2.1 (October 22, 2025)
+- ✅ **15 new essential fields** - Name, education, previous company, etc.
+- ✅ **Individual profile lookup** - 3 new endpoints
+- ✅ **Query performance** - 50-80% faster
+
+---
+
+**API v1.3.4 is production-ready with 13 company filters, 23 people filters, and enhanced response transparency!**
+
