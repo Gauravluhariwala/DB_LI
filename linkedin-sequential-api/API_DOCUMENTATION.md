@@ -1668,3 +1668,136 @@ curl -X POST 'https://enxahgcmvx4yj7d645ygutnu6q0lfknk.lambda-url.us-east-1.on.a
 
 **API v1.3.4 is production-ready with 13 company filters, 23 people filters, and enhanced response transparency!**
 
+
+---
+
+## Response Fields (v1.3.5 - Comprehensive)
+
+Sequential search now returns **14 comprehensive fields** per result:
+
+```json
+{
+  "results": [
+    {
+      // === BASIC ===
+      "publicId": "harsh-banger-123",
+      "fullName": "Harsh Banger",
+      "headline": "All things Customer Success || Scaling Leena AI",
+      "logoUrl": "a1b2c3d4e5f6...",
+      
+      // === LOCATION & INDUSTRY ===
+      "locationName": "Gurugram, Haryana, India",
+      "locationCountry": "IN",
+      "industry": "Computer Software",
+      
+      // === CURRENT JOB ===
+      "current_company_extracted": "Leena AI",
+      "current_title_extracted": "Head of Customer Success",
+      "seniority_level": "senior",
+      "total_experience_years": 12,
+      "years_in_current_role": 6,
+      
+      // === SKILLS ===
+      "skills": [
+        "Customer Success",
+        "SaaS",
+        "Account Management"
+      ],
+      
+      // === EDUCATION ===
+      "educations": [
+        {
+          "school": {
+            "name": "Stanford University",
+            "schoolId": "123",
+            "url": "https://linkedin.com/..."
+          },
+          "degree": "Bachelor's degree",
+          "fieldOfStudy": "Computer Science",
+          "startedYear": 2010,
+          "endedYear": 2014
+        }
+      ],
+      
+      // === WORK HISTORY ===
+      "currentCompanies": [
+        {
+          "company": {
+            "name": "Leena AI",
+            "url": "https://linkedin.com/company/..."
+          },
+          "positions": [
+            {
+              "title": "Head of Customer Success",
+              "location": "India",
+              "description": "Leading customer success initiatives...",
+              "startDateYear": 2021,
+              "startDateMonth": 3,
+              "employmentType": "Full-time"
+            }
+          ]
+        }
+      ],
+      
+      "previousCompanies": [
+        {
+          "company": {
+            "name": "Google",
+            "companyId": 12345
+          },
+          "positions": [
+            {
+              "title": "Senior Account Manager",
+              "location": "Mountain View, CA",
+              "startDateYear": 2018,
+              "endDateYear": 2021
+            }
+          ]
+        }
+      ],
+      
+      // === LANGUAGES ===
+      "languages": [
+        {
+          "name": "English",
+          "proficiency": "PROFESSIONAL_WORKING"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Benefits:**
+- ✅ Complete profile data in single query
+- ✅ No need for separate profile lookup
+- ✅ Verify actual position titles vs headlines
+- ✅ See full work history and education
+- ✅ All data needed for contact lists, CRM enrichment, etc.
+
+---
+
+## Version 1.3.5 (October 24, 2025) - Complete Response
+
+### Enhanced Response Fields:
+- ✅ Added `logoUrl` - Profile picture
+- ✅ Added `industry` - Industry category
+- ✅ Added `years_in_current_role` - Job tenure
+- ✅ Added `educations` - Full education history
+- ✅ Added `previousCompanies` - Complete work history
+- ✅ Added `languages` - Language skills
+
+### Total Response Fields:
+**14 comprehensive fields** returned for each result in sequential search:
+1. publicId, fullName, headline, logoUrl
+2. locationName, locationCountry, industry
+3. current_company_extracted, current_title_extracted
+4. seniority_level, total_experience_years, years_in_current_role
+5. skills, educations, currentCompanies, previousCompanies, languages
+
+**No more payload reduction - full transparency!**
+
+Previously returned: 9 fields (70% reduction)
+Now returns: 14 fields (complete profile data)
+
+---
