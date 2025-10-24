@@ -45,11 +45,13 @@ def search_people_at_companies(
         'size': page_size,
         'track_total_hits': True,  # OPTIMIZATION: Only count up to 10K (50-80% faster!)
         'timeout': '15s',  # Fail fast instead of blocking
-        # FIELD FILTERING: Return only essential fields (70% payload reduction)
+        # FIELD FILTERING: Return essential fields + current job details
         '_source': {
             'includes': [
                 'publicId', 'fullName', 'headline',
-                'current_company_extracted', 'locationName', 'locationCountry',
+                'current_company_extracted', 'current_title_extracted',
+                'currentCompanies',  # Includes positions with actual job titles
+                'locationName', 'locationCountry',
                 'seniority_level', 'total_experience_years', 'skills'
             ]
         },

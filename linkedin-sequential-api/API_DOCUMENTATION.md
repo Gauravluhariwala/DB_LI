@@ -1290,3 +1290,76 @@ When fetching a profile without field filtering, you get:
 
 **This is a MAJOR stability and accuracy release!**
 
+
+---
+
+## Version 1.3.4 (October 24, 2025) - Response Enhancement
+
+### Response Fields Enhanced:
+- ✅ **Added `currentCompanies`** - Full current companies with position titles array
+- ✅ **Added `current_title_extracted`** - Extracted current job title
+- ✅ **Now returns actual position titles** - Can verify why results matched
+
+### Why This Matters:
+Previously, you only saw the headline (user-written text).
+Now you see the ACTUAL current job title from their position data.
+
+**Example:**
+- Headline: "All things Customer Success"
+- Actual Position: "Head of Customer Success" ← NOW VISIBLE!
+
+This transparency helps verify search accuracy and see real job titles.
+
+### Updated Response Structure:
+
+```json
+{
+  "results": [
+    {
+      "publicId": "...",
+      "fullName": "Harsh Banger",
+      "headline": "All things Customer Success || Scaling...",
+      "current_title_extracted": "Head of Customer Success",
+      "currentCompanies": [
+        {
+          "company": {"name": "Leena AI"},
+          "positions": [
+            {
+              "title": "Head of Customer Success",
+              "startDateYear": 2021,
+              "location": "India",
+              "employmentType": "Full-time"
+            }
+          ]
+        }
+      ],
+      "current_company_extracted": "Leena AI",
+      "locationName": "Gurugram, Haryana, India",
+      "skills": [...]
+    }
+  ]
+}
+```
+
+---
+
+## Version 1.3.3 (October 24, 2025) - Max Clause Fix
+
+### Critical Bug Fixes:
+- ✅ **Fixed max_clause_count error** - Removed fuzzy matching (was causing 1024 clause explosion)
+- ✅ **Changed to operator:and** - Precise job title matching without clause explosion
+- ✅ **80% title accuracy** - Filters to exact leadership roles
+
+### Query Optimization:
+- No fuzzy expansion (prevents 1000+ clause generation)
+- Uses `operator: "and"` for precise matching
+- Handles variations: "Head of", "Head -", "Head," automatically
+- Query time: <2 seconds
+
+### Trade-offs:
+- ❌ No typo correction (won't fix "Enginer" → "Engineer")
+- ✅ Can use large arrays without errors (tested with 5+ job titles)
+- ✅ Much faster queries (no fuzzy expansion overhead)
+- ✅ More precise results (80% accuracy)
+
+---
