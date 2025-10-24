@@ -86,15 +86,18 @@ def search_people_at_companies(
         if isinstance(job_titles, str):
             job_titles = [job_titles]
 
-        # Create nested bool: Must match at least ONE job title (OR within array, AND across fields)
+        # Create nested bool: Must match at least ONE job title (OR within array)
+        # Using match with operator:and on CURRENT title field only (not headline)
+        # This handles variations: "Head of", "Head -", "Head," without clause explosion
         title_queries = []
         for title in job_titles:
+            # Search ONLY in current job title (currentCompanies.positions.title)
             title_queries.append({
-                'multi_match': {
-                    'query': title,
-                    'fields': ['headline^2', 'currentCompanies.positions.title'],
-                    'type': 'best_fields',
-                    'fuzziness': 'AUTO'
+                'match': {
+                    'currentCompanies.positions.title': {
+                        'query': title,
+                        'operator': 'and'  # All words must be present
+                    }
                 }
             })
 
@@ -210,7 +213,6 @@ def search_people_at_companies(
                     'query': name,
                     'fields': ['fullName^2', 'firstName', 'lastName'],
                     'type': 'best_fields',
-                    'fuzziness': 'AUTO'
                 }
             })
 
@@ -235,7 +237,6 @@ def search_people_at_companies(
                 'match': {
                     'current_title_extracted': {
                         'query': title,
-                        'fuzziness': 'AUTO'
                     }
                 }
             })
@@ -302,7 +303,6 @@ def search_people_at_companies(
                 'match': {
                     'educations.school.name': {
                         'query': school,
-                        'fuzziness': 'AUTO'
                     }
                 }
             })
@@ -328,7 +328,6 @@ def search_people_at_companies(
                 'match': {
                     'educations.degree': {
                         'query': degree,
-                        'fuzziness': 'AUTO'
                     }
                 }
             })
@@ -354,7 +353,6 @@ def search_people_at_companies(
                 'match': {
                     'educations.fieldOfStudy': {
                         'query': field,
-                        'fuzziness': 'AUTO'
                     }
                 }
             })
@@ -402,7 +400,6 @@ def search_people_at_companies(
                 'match': {
                     'previousCompanies.company.name': {
                         'query': company,
-                        'fuzziness': 'AUTO'
                     }
                 }
             })
@@ -428,7 +425,6 @@ def search_people_at_companies(
                 'match': {
                     'certifications.name': {
                         'query': cert,
-                        'fuzziness': 'AUTO'
                     }
                 }
             })

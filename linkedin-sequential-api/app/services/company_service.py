@@ -129,7 +129,6 @@ def search_companies(company_filters: dict, limit: int = 200) -> Tuple[List[str]
                         # Tier 2: Phrase match (medium priority)
                         {'match_phrase': {'name': {'query': name, 'boost': 100}}},
                         # Tier 3: Fuzzy match (lowest priority, for typos)
-                        {'match': {'name': {'query': name, 'fuzziness': 'AUTO', 'boost': 1}}}
                     ],
                     'minimum_should_match': 1
                 }
@@ -161,7 +160,6 @@ def search_companies(company_filters: dict, limit: int = 200) -> Tuple[List[str]
                         # Tier 2: Phrase match (medium priority)
                         {'match_phrase': {'specialties': {'query': spec, 'boost': 5}}},
                         # Tier 3: Fuzzy match (lowest priority, for variations)
-                        {'match': {'specialties': {'query': spec, 'fuzziness': 'AUTO', 'boost': 1}}}
                     ],
                     'minimum_should_match': 1
                 }
@@ -219,7 +217,6 @@ def search_companies(company_filters: dict, limit: int = 200) -> Tuple[List[str]
                 'match': {
                     'funding.lastRound.leadInvestors.name': {
                         'query': investor,
-                        'fuzziness': 'AUTO'
                     }
                 }
             })
