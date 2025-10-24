@@ -45,14 +45,23 @@ def search_people_at_companies(
         'size': page_size,
         'track_total_hits': True,  # OPTIMIZATION: Only count up to 10K (50-80% faster!)
         'timeout': '15s',  # Fail fast instead of blocking
-        # FIELD FILTERING: Return essential fields + current job details
+        # FIELD FILTERING: Return comprehensive profile data
         '_source': {
             'includes': [
-                'publicId', 'fullName', 'headline',
+                # Basic
+                'publicId', 'fullName', 'headline', 'logoUrl',
+                # Location & Industry
+                'locationName', 'locationCountry', 'industry',
+                # Current Job
                 'current_company_extracted', 'current_title_extracted',
-                'currentCompanies',  # Includes positions with actual job titles
-                'locationName', 'locationCountry',
-                'seniority_level', 'total_experience_years', 'skills'
+                # Experience
+                'seniority_level', 'total_experience_years', 'years_in_current_role',
+                # Skills & Education
+                'skills', 'educations',
+                # Work History
+                'currentCompanies', 'previousCompanies',
+                # Languages
+                'languages'
             ]
         },
         # Sort for consistent pagination
