@@ -9,6 +9,7 @@ import base64
 import json
 from typing import Dict, Any
 from app.services import company_service, people_service
+from app.services import company_lookup_service
 from app.utils.session_token import generate_session_token, decode_session_token, validate_token_matches_criteria
 from app.config import settings
 
@@ -196,6 +197,9 @@ async def execute_sequential_search(
     suggestion = None
     if companies_count > 1000:
         suggestion = f"{companies_count:,} companies matched. Consider adding location, size, or founded_after filters to refine results."
+
+    # ENRICHMENT: Add company domain + industry to all company objects
+    profiles = company_lookup_service.enrich_profile_companies(profiles)
 
     return {
         'status': 'success',
