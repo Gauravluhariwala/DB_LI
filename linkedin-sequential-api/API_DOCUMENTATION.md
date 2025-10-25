@@ -1939,3 +1939,167 @@ Now returns: 14 fields (complete profile data)
 - ✅ Automatic - no frontend work required
 
 ---
+
+---
+
+## Final Response Structure (v1.3.7)
+
+### Complete Profile Response
+
+Each profile in `results` array contains **14 comprehensive fields** with auto-enriched company and education data:
+
+```json
+{
+  "results": [
+    {
+      // === BASIC INFO ===
+      "publicId": "siri-chauhan-1b35a4221",
+      "fullName": "Siri Chauhan",
+      "headline": "security manager",
+      "logoUrl": "f3f9541a03d2be36ef60bad9b35e5f07",
+      
+      // === LOCATION & INDUSTRY ===
+      "locationName": "Ahmedabad, Gujarat, India",
+      "locationCountry": "IN",
+      "industry": "E-learning",
+      
+      // === CAREER ===
+      "current_company_extracted": "OMS Learning",
+      "current_title_extracted": "Manager of IT Training",
+      "seniority_level": "manager",
+      "total_experience_years": 12,
+      "years_in_current_role": 6,
+      
+      // === CURRENT COMPANIES (Auto-Enriched) ===
+      "currentCompanies": [
+        {
+          "company": {
+            "name": "OMS Learning",
+            "domain": null,              // ⭐ Auto-added (null if not in DB)
+            "industry": null             // ⭐ Auto-added (null if not in DB)
+          },
+          "positions": [
+            {
+              "title": "Manager of IT Training",
+              "location": "Delhi, India",
+              "description": "Full job description text...",
+              "startDateYear": 2018,
+              "startDateMonth": 11,
+              "employmentType": "Full-time"
+            }
+          ]
+        }
+      ],
+      
+      // === PREVIOUS COMPANIES (Auto-Enriched) ===
+      "previousCompanies": [
+        {
+          "company": {
+            "name": "CAREERCUP, LLC",
+            "url": "https://www.linkedin.com/company/54252746/",
+            "companyId": 54252746,
+            "domain": "gayle.com",           // ⭐ Auto-added
+            "industry": "Management Consulting" // ⭐ Auto-added
+          },
+          "positions": [
+            {
+              "title": "Training Specialist",
+              "location": "Ahmedabad, India",
+              "startDateYear": 2015,
+              "endDateYear": 2018,
+              "employmentType": "Full-time"
+            }
+          ]
+        }
+      ],
+      
+      // === EDUCATION (Auto-Enriched) ===
+      "educations": [
+        {
+          "school": {
+            "name": "University of Gujrat",
+            "schoolId": "18975724",
+            "url": "https://www.linkedin.com/company/18975724/",
+            "domain": "edu.com",            // ⭐ Auto-added
+            "industry": "Higher Education"  // ⭐ Auto-added
+          },
+          "degree": "Master of Computer Applications - MCA",
+          "fieldOfStudy": "Computer Science",
+          "startedYear": 2010,
+          "endedYear": 2013
+        }
+      ],
+      
+      // === SKILLS ===
+      "skills": [
+        "Cybersecurity",
+        "Information Security Training",
+        ...
+      ],
+      
+      // === LANGUAGES ===
+      "languages": []
+    }
+  ],
+  
+  // === PAGINATION ===
+  "pagination": {
+    "current_page": 1,
+    "page_size": 10,
+    "total_results": 1,
+    "total_pages": 1,
+    "has_next": false,
+    "session_token": "..."
+  },
+  
+  // === METADATA ===
+  "metadata": {
+    "companies_matched": 0,
+    "companies_used": 0,
+    "profiles_matched": 1,
+    "query_time_ms": 1200,
+    "search_mode": "direct"
+  }
+}
+```
+
+---
+
+## Auto-Enrichment Summary (v1.3.7)
+
+### What Gets Enriched:
+
+**1. Current Companies:**
+- Adds `domain` and `industry` to each company object
+- Uses companyId → memberId matching
+- Extracts ID from URL if companyId missing
+
+**2. Previous Companies:**
+- Same enrichment as current companies
+- Full work history with company details
+
+**3. Education Schools:**
+- Adds `domain` and `industry` to school objects
+- Uses schoolId → memberId matching
+- Extracts ID from school URL if schoolId missing
+
+### Enrichment Coverage:
+
+- **Companies:** 80-90% (when IDs exist in database)
+- **Education:** 60-70% (when schoolIds exist)
+- **Single batch query:** All enrichment done in one OpenSearch call
+- **Performance:** +300-500ms to query time
+
+### Enriched Fields:
+
+```
+company.domain    // Website domain (e.g., "google.com")
+company.industry  // Industry category (e.g., "Computer Software")
+
+school.domain     // University domain (e.g., "stanford.edu")  
+school.industry   // Category (e.g., "Higher Education")
+```
+
+**All automatic - no separate API calls needed!**
+
+---

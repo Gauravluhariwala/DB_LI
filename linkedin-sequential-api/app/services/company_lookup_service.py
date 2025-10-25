@@ -161,8 +161,19 @@ def enrich_profile_companies(profiles: List[Dict[str, Any]]) -> List[Dict[str, A
         # From education schools
         for education in profile.get('educations', []):
             school = education.get('school', {})
-            school_id = school.get('schoolId')
             school_name = school.get('name', '').strip()
+
+            # Try schoolId first
+            school_id = school.get('schoolId')
+
+            # If no schoolId, extract from URL (same as companies)
+            if not school_id and school.get('url') and '/company/' in school['url']:
+                try:
+                    parts = school['url'].split('/company/')
+                    if len(parts) > 1:
+                        school_id = int(parts[1].strip('/'))
+                except:
+                    pass
 
             if school_id and school_name:
                 try:
