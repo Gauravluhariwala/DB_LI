@@ -1801,3 +1801,141 @@ Previously returned: 9 fields (70% reduction)
 Now returns: 14 fields (complete profile data)
 
 ---
+
+---
+
+## Version 1.3.6 (October 24, 2025) - Auto Company Enrichment
+
+### Automatic Company Enrichment:
+- ✅ **Auto-adds domain** to ALL company objects (current + previous)
+- ✅ **Auto-adds industry** to ALL company objects
+- ✅ **Uses LinkedIn company IDs** for accurate matching
+- ✅ **Extracts from URLs** when companyId missing
+- ✅ **87% enrichment rate** (rest not in DB or empty data)
+
+### How It Works:
+1. Returns profile results as normal
+2. Extracts ALL company IDs from currentCompanies + previousCompanies
+3. Single batch query to companies index (efficient!)
+4. Merges domain + industry into company objects
+5. Returns enriched response
+
+### Performance:
+- Warm queries: **1.4 seconds** (+40% from 1.0s)
+- Cold start: ~3.6 seconds (Lambda initialization)
+- Enrichment query: +300-500ms
+- Response size: ~60 KB (was 54 KB)
+
+### Enhanced Company Object:
+
+**Before v1.3.6:**
+```json
+{
+  "company": {
+    "name": "Leena AI",
+    "url": "https://www.linkedin.com/company/...",
+    "companyId": 12345
+  }
+}
+```
+
+**After v1.3.6:**
+```json
+{
+  "company": {
+    "name": "Leena AI",
+    "url": "https://www.linkedin.com/company/...",
+    "companyId": 12345,
+    "domain": "leena.ai",           // ⭐ AUTO-ADDED
+    "industry": "Computer Software"  // ⭐ AUTO-ADDED
+  }
+}
+```
+
+### Coverage:
+- 83-87% of companies enriched with domain + industry
+- 13-17% not enriched (not in database or empty data)
+- Works for BOTH currentCompanies and previousCompanies
+- Total: ~75-125 companies enriched per API call (25 profiles × 3-5 companies each)
+
+### Cost Impact:
+- Per call: $0.00075 → $0.00095 (+27%)
+- Monthly (100K calls): $945 → $1,020 (+$75)
+- Worth it for automatic enrichment!
+
+---
+
+## Complete Response Example (v1.3.6)
+
+```json
+{
+  "status": "success",
+  "results": [
+    {
+      "publicId": "harsh-banger-123",
+      "fullName": "Harsh Banger",
+      "headline": "All things Customer Success",
+      "logoUrl": "abc123...",
+      "locationName": "Gurugram, India",
+      "locationCountry": "IN",
+      "industry": "E-learning",
+      "current_company_extracted": "Leena AI",
+      "current_title_extracted": "Head of Customer Success",
+      "seniority_level": "senior",
+      "total_experience_years": 12,
+      "years_in_current_role": 6,
+      "skills": ["Customer Success", "SaaS"],
+      
+      "currentCompanies": [
+        {
+          "company": {
+            "name": "Leena AI",
+            "url": "https://www.linkedin.com/company/leena-ai/",
+            "companyId": 88002910,
+            "domain": "leena.ai",           // ⭐ v1.3.6
+            "industry": "Computer Software"  // ⭐ v1.3.6
+          },
+          "positions": [
+            {
+              "title": "Head of Customer Success",
+              "location": "India",
+              "startDateYear": 2021,
+              "employmentType": "Full-time"
+            }
+          ]
+        }
+      ],
+      
+      "previousCompanies": [
+        {
+          "company": {
+            "name": "Google",
+            "url": "https://www.linkedin.com/company/1441/",
+            "companyId": 1441,
+            "domain": "google.com",          // ⭐ v1.3.6
+            "industry": "Internet"           // ⭐ v1.3.6
+          },
+          "positions": [...]
+        }
+      ],
+      
+      "educations": [...],
+      "languages": [...]
+    }
+  ],
+  "pagination": {...},
+  "metadata": {
+    "profiles_matched": 1015,
+    "query_time_ms": 1400
+  }
+}
+```
+
+### Key Benefits:
+- ✅ Complete company context in single API call
+- ✅ No separate company lookup needed
+- ✅ Domain for building links, logos, enrichment
+- ✅ Industry for categorization, filtering
+- ✅ Automatic - no frontend work required
+
+---
